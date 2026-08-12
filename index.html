@@ -1,0 +1,1590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Birthday Surprise</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:Arial, sans-serif;
+        }
+
+        body{
+            min-height:100vh;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            background:linear-gradient(135deg,#ff9ecf,#ff69b4);
+            padding:20px 15px;
+            overflow-x:hidden;
+            overflow-y:auto;
+            position:relative;
+        }
+
+        /* Floating Decorations */
+        .floating-items{
+            position:fixed;
+            top:0;
+            left:0;
+            width:100%;
+            height:100%;
+            pointer-events:none;
+            overflow:hidden;
+            z-index:0;
+        }
+
+        .floating-items span{
+            position:absolute;
+            font-size:32px;
+            opacity:0.8;
+            animation:floatAround calc(5s + var(--i) * 1s) ease-in-out infinite;
+        }
+
+        @keyframes floatAround{
+            0%{ transform:translateY(0px) translateX(0px) rotate(0deg); }
+            25%{ transform:translateY(-10px) translateX(5px) rotate(5deg); }
+            50%{ transform:translateY(5px) translateX(-5px) rotate(-5deg); }
+            75%{ transform:translateY(-8px) translateX(3px) rotate(3deg); }
+            100%{ transform:translateY(0px) translateX(0px) rotate(0deg); }
+        }
+
+        /* Login Page */
+        .container{
+            text-align:center;
+            background:white;
+            padding:25px;
+            border-radius:20px;
+            box-shadow:0 10px 30px rgba(0,0,0,0.2);
+            width:100%;
+            max-width:360px;
+            position:relative;
+            overflow:hidden;
+            z-index:2;
+        }
+
+        .top-decor{
+            position:absolute;
+            top:10px;
+            left:0;
+            width:100%;
+            display:flex;
+            justify-content:space-around;
+            font-size:28px;
+            animation:float 3s infinite ease-in-out;
+        }
+
+        @keyframes float{
+            0%{transform:translateY(0);}
+            50%{transform:translateY(-8px);}
+            100%{transform:translateY(0);}
+        }
+
+        h1{
+            color:#ff1493;
+            margin-top:40px;
+            margin-bottom:20px;
+            font-size:32px;
+        }
+
+        .calculator{
+            background:#ffe4ef;
+            padding:20px;
+            border-radius:15px;
+        }
+
+        .display{
+            width:100%;
+            height:50px;
+            border:none;
+            border-radius:10px;
+            margin-bottom:15px;
+            padding:10px;
+            font-size:20px;
+            text-align:center;
+            outline:none;
+            background:white;
+            color:#ff1493;
+        }
+
+        .buttons{
+            display:grid;
+            grid-template-columns:repeat(3,1fr);
+            gap:10px;
+        }
+
+        button{
+            width:100%;
+            padding:15px;
+            border:none;
+            border-radius:10px;
+            background:#ff69b4;
+            color:white;
+            font-size:18px;
+            cursor:pointer;
+            transition:0.2s;
+        }
+
+        button:active{
+            transform:scale(0.95);
+        }
+
+        /* General Pages Style */
+        .cake-page,
+        .gift-page,
+        .next-page,
+        .gallery-page,
+        .sorry-page{
+            display:none;
+            text-align:center;
+            color:white;
+            width:100%;
+            max-width:600px;
+            position:relative;
+            z-index:2;
+            margin:auto;
+        }
+
+        /* Beautiful Graphical Cake Styling */
+        .cake-container {
+            position:relative;
+            width:100%;
+            max-width:300px;
+            height:320px;
+            margin:20px auto 40px auto;
+        }
+
+        .cake-text {
+            font-size:clamp(28px,5vw,38px);
+            font-weight:bold;
+            margin-bottom:20px;
+            text-shadow:2px 2px 8px rgba(0,0,0,0.3);
+            min-height:50px;
+        }
+
+        /* Base Plate */
+        .plate {
+            position:absolute;
+            bottom:0;
+            left:50%;
+            transform:translateX(-50%);
+            width:260px;
+            height:20px;
+            background:#ffe4ef;
+            border-radius:50px;
+            box-shadow:0 6px 15px rgba(0,0,0,0.2),
+                       inset 0 -3px 5px rgba(0,0,0,0.05);
+        }
+
+        /* Bottom Cake Layer */
+        .cake-bottom {
+            position:absolute;
+            bottom:20px;
+            left:50%;
+            transform:translateX(-50%);
+            width:230px;
+            height:90px;
+            background:linear-gradient(to right,#ff7eb3,#ff4081);
+            border-radius:15px;
+            box-shadow:0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        /* Top Cake Layer */
+        .cake-top {
+            position:absolute;
+            bottom:110px;
+            left:50%;
+            transform:translateX(-50%);
+            width:180px;
+            height:75px;
+            background:linear-gradient(to right,#ff9fc7,#ff69b4);
+            border-radius:15px;
+            box-shadow:0 5px 15px rgba(0,0,0,0.15);
+        }
+
+        /* Top Icing */
+        .cake-top::before,
+        .cake-bottom::before {
+            content:"";
+            position:absolute;
+            top:0;
+            left:0;
+            width:100%;
+            height:25px;
+            background:white;
+            border-radius:15px 15px 0 0;
+            box-shadow:inset 0 -3px 5px rgba(0,0,0,0.05);
+        }
+
+        /* Cream Drips */
+        .drip {
+            position:absolute;
+            background:white;
+            border-radius:0 0 12px 12px;
+        }
+
+        .cake-top .drip1 {
+            height:35px;
+            left:20px;
+            top:15px;
+            width:22px;
+        }
+
+        .cake-top .drip2 {
+            height:25px;
+            left:70px;
+            top:15px;
+            width:18px;
+        }
+
+        .cake-top .drip3 {
+            height:42px;
+            right:25px;
+            top:15px;
+            width:20px;
+        }
+
+        .cake-bottom .drip1 {
+            height:45px;
+            left:30px;
+            top:15px;
+            width:22px;
+        }
+
+        .cake-bottom .drip2 {
+            height:30px;
+            left:95px;
+            top:15px;
+            width:20px;
+        }
+
+        .cake-bottom .drip3 {
+            height:38px;
+            right:40px;
+            top:15px;
+            width:24px;
+        }
+
+        /* Candles */
+        .candles-group {
+            position:absolute;
+            top:-45px;
+            left:50%;
+            transform:translateX(-50%);
+            display:flex;
+            gap:25px;
+            z-index:2;
+        }
+
+        .candle {
+            position:relative;
+            width:14px;
+            height:50px;
+            background:repeating-linear-gradient(
+                45deg,
+                #fff,
+                #fff 5px,
+                #ff1493 5px,
+                #ff1493 10px
+            );
+            border-radius:4px 4px 0 0;
+            box-shadow:2px 2px 5px rgba(0,0,0,0.2);
+        }
+
+        /* Flame */
+        .flame {
+            position:absolute;
+            top:-24px;
+            left:50%;
+            transform:translateX(-50%);
+            width:16px;
+            height:26px;
+            background:radial-gradient(
+                circle,
+                #fff 10%,
+                #ffd700 50%,
+                #ff8c00 100%
+            );
+            border-radius:50% 50% 20% 20%;
+            box-shadow:0 0 15px rgba(255,165,0,0.9);
+            animation:flicker 0.15s ease-in-out infinite alternate;
+            transition:opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        @keyframes flicker {
+            0%{
+                transform:translateX(-50%) scale(1);
+            }
+
+            100%{
+                transform:translateX(-50%) scale(1.05) skewX(2deg);
+            }
+        }
+
+        .flame.extinguished {
+            opacity:0 !important;
+            transform:translateX(-50%) scale(0) !important;
+        }
+
+        /* Gifts */
+        .gifts-title {
+            font-size:clamp(26px,4vw,36px);
+            margin-bottom:30px;
+            text-shadow:2px 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .gifts-grid {
+            display:grid;
+            grid-template-columns:repeat(3,1fr);
+            gap:15px;
+            margin-bottom:35px;
+            padding:10px;
+        }
+
+        .gift-box {
+            background:white;
+            padding:25px 10px;
+            border-radius:15px;
+            box-shadow:0 8px 20px rgba(0,0,0,0.2);
+            cursor:pointer;
+            transition:transform 0.3s, box-shadow 0.3s;
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            justify-content:center;
+        }
+
+        .gift-box:hover {
+            transform:translateY(-10px) scale(1.05);
+            box-shadow:0 12px 25px rgba(0,0,0,0.3);
+        }
+
+        .gift-icon {
+            font-size:clamp(35px,6vw,55px);
+            margin-bottom:10px;
+            animation:float 2.5s infinite ease-in-out;
+        }
+
+        .gift-label {
+            color:#ff1493;
+            font-size:clamp(14px,2vw,18px);
+            font-weight:bold;
+        }
+
+        /* Special Note */
+        .special-note{
+            background:rgba(255,255,255,0.15);
+            backdrop-filter:blur(8px);
+            border:2px solid rgba(255,255,255,0.4);
+            border-radius:25px;
+            padding:30px 20px;
+            box-shadow:0 8px 25px rgba(0,0,0,0.2);
+            margin-bottom:30px;
+            animation:softGlow 3s infinite ease-in-out;
+        }
+
+        .special-note h3{
+            font-size:clamp(24px,4vw,32px);
+            margin-bottom:20px;
+            color:#fff;
+            text-shadow:0 0 10px rgba(255,255,255,0.8);
+        }
+
+        .love-lines h2{
+            font-size:clamp(26px,5vw,38px);
+            margin-bottom:20px;
+            color:#fff;
+            line-height:1.4;
+        }
+
+        .love-lines p{
+            font-size:clamp(16px,2.5vw,20px);
+            line-height:1.8;
+            margin-bottom:22px;
+            color:#fff;
+        }
+
+        .note-top,
+        .note-bottom{
+            font-size:28px;
+            margin-bottom:15px;
+            animation:float 3s infinite ease-in-out;
+        }
+
+        .note-bottom{
+            margin-top:10px;
+        }
+
+        @keyframes softGlow{
+            0%{
+                box-shadow:0 0 15px rgba(255,255,255,0.2);
+            }
+
+            50%{
+                box-shadow:0 0 30px rgba(255,255,255,0.5);
+            }
+
+            100%{
+                box-shadow:0 0 15px rgba(255,255,255,0.2);
+            }
+        }
+
+        /* Sorry Page */
+        .sorry-page .special-note{
+            background:rgba(255,255,255,0.18);
+        }
+
+        .sorry-page .special-note h3{
+            color:#fff;
+        }
+
+        .sorry-page .love-lines h2{
+            text-shadow:0 0 12px rgba(255,255,255,0.7);
+        }
+
+        .sorry-page .love-lines p{
+            line-height:1.9;
+        }
+
+        /* Buttons */
+        .btn-group {
+            display:flex;
+            justify-content:center;
+            gap:15px;
+            margin-top:15px;
+            flex-wrap:wrap;
+        }
+
+        .action-btn{
+            width:140px;
+            padding:12px;
+            background:#ff1493;
+            font-size:18px;
+            border-radius:25px;
+            color:white;
+            border:none;
+            cursor:pointer;
+            transition:0.2s;
+            box-shadow:0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .action-btn.wide-btn {
+            width:100%;
+            max-width:280px;
+            border-radius:25px;
+        }
+
+        .action-btn.secondary-btn {
+            background:rgba(255,255,255,0.2);
+            border:2px solid white;
+            box-shadow:none;
+        }
+
+        .action-btn:active {
+            transform:scale(0.95);
+        }
+
+        /* Gallery */
+        .gallery-title{
+            font-size:clamp(28px,4vw,36px);
+            margin-bottom:20px;
+        }
+
+        .gallery{
+            display:grid;
+            grid-template-columns:repeat(2,1fr);
+            gap:15px;
+            margin-bottom:25px;
+            padding:5px;
+        }
+
+        @media (min-width:600px) {
+            .gallery {
+                grid-template-columns:repeat(3,1fr);
+            }
+        }
+
+        .photo-card {
+            background:white;
+            padding:10px 10px 14px 10px;
+            border-radius:4px;
+            box-shadow:0 8px 16px rgba(0,0,0,0.2);
+            cursor:pointer;
+            transition:transform 0.3s ease, box-shadow 0.3s ease;
+            transform:rotate(var(--rotation));
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+        }
+
+        .photo-card:hover {
+            transform:scale(1.08) rotate(0deg);
+            box-shadow:0 12px 24px rgba(0,0,0,0.3);
+            z-index:10;
+        }
+
+        .photo-card img{
+            width:100%;
+            height:130px;
+            object-fit:cover;
+            border:1px solid #eee;
+            border-radius:2px;
+        }
+
+        @media (min-width:600px) {
+            .photo-card img {
+                height:160px;
+            }
+        }
+
+        .photo-caption {
+            color:#ff1493;
+            font-size:13px;
+            font-weight:bold;
+            margin-top:10px;
+            font-family:'Georgia', serif;
+            text-align:center;
+            width:100%;
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+        }
+
+        /* Image Viewer */
+        .viewer{
+            position:fixed;
+            top:0;
+            left:0;
+            width:100%;
+            height:100%;
+            background:rgba(0,0,0,0.9);
+            display:none;
+            flex-direction:column;
+            justify-content:center;
+            align-items:center;
+            z-index:999;
+            padding:10px;
+        }
+
+        .viewer-card {
+            background:white;
+            padding:16px 16px 24px 16px;
+            border-radius:8px;
+            box-shadow:0 15px 35px rgba(0,0,0,0.5);
+            width:100%;
+            max-width:400px;
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            position:relative;
+        }
+
+        .viewer-card img{
+            width:100%;
+            max-height:70vh;
+            object-fit:contain;
+            border-radius:4px;
+            border:1px solid #ddd;
+        }
+
+        .viewer-caption {
+            color:#ff1493;
+            font-size:18px;
+            font-weight:bold;
+            margin-top:15px;
+            font-family:'Georgia', serif;
+            text-align:center;
+        }
+
+        .arrow-btn{
+            position:absolute;
+            top:50%;
+            transform:translateY(-50%);
+            width:40px;
+            height:40px;
+            border:none;
+            border-radius:50%;
+            background:#ff1493;
+            color:white;
+            font-size:20px;
+            cursor:pointer;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            box-shadow:0 4px 10px rgba(0,0,0,0.3);
+            z-index:1000;
+            transition:0.2s;
+        }
+
+        .arrow-btn:active {
+            transform:translateY(-50%) scale(0.9);
+        }
+
+        .left-arrow{
+            left:-20px;
+        }
+
+        .right-arrow{
+            right:-20px;
+        }
+
+        @media (max-width:480px) {
+            .left-arrow{
+                left:10px;
+            }
+
+            .right-arrow{
+                right:10px;
+            }
+        }
+
+        .close-btn{
+            margin-top:20px;
+            background:#ff1493;
+            color:white;
+            border:none;
+            border-radius:20px;
+            font-size:15px;
+            padding:10px 30px;
+            width:auto;
+            cursor:pointer;
+            transition:0.2s;
+            box-shadow:0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .close-btn:active {
+            transform:scale(0.95);
+        }
+
+        /* Mobile Gifts */
+        @media (max-width:480px){
+            .gifts-grid{
+                gap:8px;
+                padding:5px;
+            }
+
+            .gift-box{
+                padding:20px 5px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Floating Decorations -->
+    <div class="floating-items">
+        <span style="top:8%; left:5%; --i:1;">💖</span>
+        <span style="top:15%; left:18%; --i:2;">🎈</span>
+        <span style="top:10%; left:35%; --i:3;">💎</span>
+        <span style="top:20%; left:55%; --i:4;">💕</span>
+        <span style="top:12%; left:75%; --i:5;">🎀</span>
+        <span style="top:18%; left:90%; --i:6;">💖</span>
+
+        <span style="top:45%; left:8%; --i:3;">🎈</span>
+        <span style="top:55%; left:25%; --i:5;">💎</span>
+        <span style="top:48%; left:45%; --i:2;">💕</span>
+        <span style="top:60%; left:70%; --i:4;">💖</span>
+        <span style="top:52%; left:88%; --i:6;">🎈</span>
+
+        <span style="top:82%; left:12%; --i:2;">💎</span>
+        <span style="top:88%; left:35%; --i:4;">💕</span>
+        <span style="top:80%; left:58%; --i:5;">🎀</span>
+        <span style="top:90%; left:80%; --i:3;">💖</span>
+    </div>
+
+    <!-- Background Music -->
+    <audio id="bgMusic" loop>
+        <source src="music.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- LOGIN PAGE -->
+    <div class="container" id="loginPage">
+
+        <div class="top-decor">
+            <span>🎈</span>
+            <span>💖</span>
+            <span>🎈</span>
+            <span>💝</span>
+            <span>🎈</span>
+        </div>
+
+        <h1>🎂 Birthday 🎂</h1>
+
+        <div class="calculator">
+
+            <input
+                type="password"
+                id="password"
+                class="display"
+                placeholder="Enter Password"
+                readonly
+            >
+
+            <div class="buttons">
+
+                <button onclick="addValue('1')">1</button>
+                <button onclick="addValue('2')">2</button>
+                <button onclick="addValue('3')">3</button>
+
+                <button onclick="addValue('4')">4</button>
+                <button onclick="addValue('5')">5</button>
+                <button onclick="addValue('6')">6</button>
+
+                <button onclick="addValue('7')">7</button>
+                <button onclick="addValue('8')">8</button>
+                <button onclick="addValue('9')">9</button>
+
+                <button onclick="clearDisplay()">C</button>
+                <button onclick="addValue('0')">0</button>
+                <button onclick="checkPassword()">OK</button>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- CAKE PAGE -->
+    <div class="cake-page" id="cakePage">
+
+        <div class="cake-text" id="cakeHeading">
+            Make a Wish ✨
+        </div>
+
+        <div class="cake-container">
+
+            <div class="plate"></div>
+
+            <div class="cake-bottom">
+                <div class="drip drip1"></div>
+                <div class="drip drip2"></div>
+                <div class="drip drip3"></div>
+            </div>
+
+            <div class="cake-top">
+
+                <div class="drip drip1"></div>
+                <div class="drip drip2"></div>
+                <div class="drip drip3"></div>
+
+                <div class="candles-group">
+
+                    <div class="candle">
+                        <div class="flame"></div>
+                 </div>
+
+                    <div class="candle">
+                        <div class="flame"></div>
+                    </div>
+
+                    <div class="candle">
+                        <div class="flame"></div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div
+            class="btn-group"
+            id="cakeActionGroup"
+            style="flex-direction:column; align-items:center;"
+        >
+
+            <button
+                class="action-btn wide-btn"
+                id="blowBtn"
+                onclick="blowCandles()"
+            >
+                Blow & Make your Wish 🎂
+            </button>
+
+        </div>
+    </div>
+
+    <!-- GIFTS PAGE -->
+    <div class="gift-page" id="giftPage">
+
+        <h2 class="gifts-title">
+            Pick a Gift Surprise 🎁✨
+        </h2>
+
+        <div class="gifts-grid">
+
+            <div class="gift-box" onclick="chooseGift(1)">
+                <div class="gift-icon">🎁</div>
+                <div class="gift-label">Gift 1</div>
+            </div>
+
+            <div class="gift-box" onclick="chooseGift(2)">
+                <div class="gift-icon">💝</div>
+                <div class="gift-label">Gift 2</div>
+            </div>
+
+            <div class="gift-box" onclick="chooseGift(3)">
+                <div class="gift-icon">🛍️</div>
+                <div class="gift-label">Gift 3</div>
+            </div>
+
+        </div>
+
+        <div class="btn-group">
+
+            <button
+                class="action-btn secondary-btn"
+                onclick="backToCakeFromGifts()"
+            >
+                👈 Back
+            </button>
+
+        </div>
+    </div>
+
+    <!-- GIFT 1 - SPECIAL NOTE -->
+    <div class="next-page" id="nextPage">
+
+        <div class="special-note">
+
+            <div class="note-top">
+                💖 ✨ 🎀 ✨ 💖
+            </div>
+
+            <h3>
+                Special Note For You 💌
+            </h3>
+
+            <div class="love-lines">
+
+                <h2>
+                    Happy Birthday My Love 💕😘
+                </h2>
+
+                <p>
+                    Every moment with you feels magical ✨ <br>
+                    Thank you for making my life beautiful 💖 <br>
+                    I wish your smile never fades 😊💕 <br>
+                    My happiness starts with you and ends with you 💕 <br>
+                    Stay happy forever my love 😘 <br><br>
+
+                    No matter what happens, <br>
+                    I’ll always be there for you 💕 <br>
+                    You are my favorite person forever ✨ <br><br>
+
+                    In your smile, I found my happiness 😊💖 <br>
+                    In your heart, I found my home 🏡 <br>
+                    I love you more than words can say 😘
+                </p>
+
+            </div>
+
+            <div class="note-bottom">
+                💕 🎈 💎 🎈 💕
+            </div>
+
+        </div>
+
+        <div class="btn-group">
+
+            <button
+                class="action-btn secondary-btn"
+                onclick="backToGifts('nextPage')"
+            >
+                👈 Back
+            </button>
+
+        </div>
+    </div>
+
+    <!-- GIFT 3 - SORRY NOTE -->
+    <div class="sorry-page" id="sorryPage">
+
+        <div class="special-note">
+
+            <div class="note-top">
+                💔 🥺 💕 🥺 💔
+            </div>
+
+            <h3>
+                I'm Really Sorry 💌
+            </h3>
+
+            <div class="love-lines">
+
+                <h2>
+                    Sorry My Love 🥺❤️
+                </h2>
+
+                <p>
+                    I know I made a mistake, and I'm truly sorry. 🥺<br>
+                    I never wanted to hurt you or make you sad. 💔<br>
+                    Please forgive me for everything. 🙏❤️<br><br>
+
+                    You mean so much to me, and I never want to lose your smile. 😊💕<br>
+                    I'll try my best to make things right. 🫶<br><br>
+
+                    I'm really, really sorry. 🥺❤️<br>
+                    Please forgive me, my love. 💕
+                </p>
+
+            </div>
+
+            <div class="note-bottom">
+                💗 🥺 💕 🥺 💗
+            </div>
+
+        </div>
+
+        <div class="btn-group">
+
+            <button
+                class="action-btn secondary-btn"
+                onclick="backToGifts('sorryPage')"
+            >
+                👈 Back
+            </button>
+
+        </div>
+    </div>
+
+    <!-- GIFT 2 - GALLERY -->
+    <div class="gallery-page" id="galleryPage">
+
+        <h2 class="gallery-title">
+            📸 Memories 💖
+        </h2>
+
+        <div class="gallery">
+
+            <div
+                class="photo-card"
+                style="--rotation:-4deg;"
+                onclick="openImage(0)"
+            >
+                <img src="pic1.jpg" alt="Memory 1">
+                <div class="photo-caption">
+                    Your Beautiful Smile 😊
+                </div>
+            </div>
+
+            <div
+                class="photo-card"
+                style="--rotation:3deg;"
+                onclick="openImage(1)"
+            >
+                <img src="pic2.jpg" alt="Memory 2">
+                <div class="photo-caption">
+                    Candid Moments ✨
+                </div>
+            </div>
+
+            <div
+                class="photo-card"
+                style="--rotation:-2deg;"
+                onclick="openImage(2)"
+            >
+                <img src="pic3.jpg" alt="Memory 3">
+                <div class="photo-caption">
+                    My Whole Heart ❤️
+                </div>
+            </div>
+
+            <div
+                class="photo-card"
+                style="--rotation:5deg;"
+                onclick="openImage(3)"
+            >
+                <img src="pic4.jpg" alt="Memory 4">
+                <div class="photo-caption">
+                    Cutest Person Ever 🥰
+                </div>
+            </div>
+
+            <div
+                class="photo-card"
+                style="--rotation:-3deg;"
+                onclick="openImage(4)"
+            >
+                <img src="pic5.jpg" alt="Memory 5">
+                <div class="photo-caption">
+                    That Sweet Laugh 😂💕
+                </div>
+            </div>
+
+            <div
+                class="photo-card"
+                style="--rotation:4deg;"
+                onclick="openImage(5)"
+            >
+                <img src="pic6.jpg" alt="Memory 6">
+                <div class="photo-caption">
+                    Together is My Favorite Place 🗺️
+                </div>
+            </div>
+
+            <div
+                class="photo-card"
+                style="--rotation:2deg;"
+                onclick="openImage(6)"
+            >
+                <img src="pic7.jpg" alt="Memory 7">
+                <div class="photo-caption">
+                    Special Day Out 🌟
+                </div>
+            </div>
+
+            <div
+                class="photo-card"
+                style="--rotation:-5deg;"
+                onclick="openImage(7)"
+            >
+                <img src="pic8.jpg" alt="Memory 8">
+                <div class="photo-caption">
+                    The Way You Look At Me 😍
+                </div>
+            </div>
+
+            <div
+                class="photo-card"
+                style="--rotation:4deg;"
+                onclick="openImage(8)"
+            >
+                <img src="pic9.jpg" alt="Memory 9">
+                <div class="photo-caption">
+                    Making Memories 📸
+                </div>
+            </div>
+
+            <div
+                class="photo-card"
+                style="--rotation:-1deg;"
+                onclick="openImage(9)"
+            >
+                <img src="pic10.jpg" alt="Memory 10">
+                <div class="photo-caption">
+                    Forever & Always ♾️💖
+                </div>
+            </div>
+
+        </div>
+
+        <div class="btn-group">
+
+            <button
+                class="action-btn secondary-btn"
+                onclick="backToGifts('galleryPage')"
+            >
+                👈 Back
+            </button>
+
+        </div>
+    </div>
+
+    <!-- IMAGE VIEWER -->
+    <div class="viewer" id="viewer">
+
+        <div class="viewer-card">
+
+            <button
+                class="arrow-btn left-arrow"
+                onclick="prevImage(event)"
+            >
+                ❮
+            </button>
+
+            <img
+                id="viewerImg"
+                alt="Memory Photo"
+            >
+
+            <div
+                class="viewer-caption"
+                id="viewerCaption"
+            >
+                Caption Text
+            </div>
+
+            <button
+                class="arrow-btn right-arrow"
+                onclick="nextImage(event)"
+            >
+                ❯
+            </button>
+
+        </div>
+
+        <button
+            class="close-btn"
+            onclick="closeViewer()"
+        >
+            Close
+        </button>
+
+    </div>
+
+    <script>
+
+        /* =========================
+           PASSWORD
+        ========================= */
+
+        const correctPassword = "1907";
+
+        function addValue(value){
+
+            document.getElementById("password").value += value;
+
+        }
+
+        function clearDisplay(){
+
+            document.getElementById("password").value = "";
+
+        }
+
+        function checkPassword(){
+
+            const enteredPassword =
+                document.getElementById("password").value;
+
+            if(enteredPassword === correctPassword){
+
+                document
+                    .getElementById("bgMusic")
+                    .play()
+                    .catch(err =>
+                        console.log("Audio play delayed")
+                    );
+
+                document
+                    .getElementById("loginPage")
+                    .style.display = "none";
+
+                document
+                    .getElementById("cakePage")
+                    .style.display = "block";
+
+            }else{
+
+                alert("Wrong Password ❌");
+
+                clearDisplay();
+
+            }
+        }
+
+
+        /* =========================
+           CAKE
+        ========================= */
+
+        function blowCandles(){
+
+            const flames =
+                document.querySelectorAll(".flame");
+
+            flames.forEach(flame => {
+
+                flame.classList.add("extinguished");
+
+            });
+
+            document
+                .getElementById("cakeHeading")
+                .innerText =
+                "🎉 Happy Birthday! 🎉";
+
+
+            confetti({
+
+                particleCount:150,
+                angle:60,
+                spread:70,
+                origin:{
+                    x:0,
+                    y:0.8
+                }
+
+            });
+
+
+            confetti({
+
+                particleCount:150,
+                angle:120,
+                spread:70,
+                origin:{
+                    x:1,
+                    y:0.8
+                }
+
+            });
+
+
+            const actionGroup =
+                document.getElementById(
+                    "cakeActionGroup"
+                );
+
+
+            actionGroup.innerHTML = `
+
+                <div class="btn-group">
+
+                    <button
+                        class="action-btn secondary-btn"
+                        onclick="backToLogin()"
+                    >
+                        👈 Back
+                    </button>
+
+                    <button
+                        class="action-btn"
+                        onclick="openGiftsPage()"
+                    >
+                        Next 💕
+                    </button>
+
+                </div>
+
+            `;
+        }
+
+
+        /* =========================
+           PAGE NAVIGATION
+        ========================= */
+
+        function openGiftsPage(){
+
+            document
+                .getElementById("cakePage")
+                .style.display = "none";
+
+            document
+                .getElementById("giftPage")
+                .style.display = "block";
+
+        }
+
+
+        function backToCakeFromGifts(){
+
+            document
+                .getElementById("giftPage")
+                .style.display = "none";
+
+            document
+                .getElementById("cakePage")
+                .style.display = "block";
+
+        }
+
+
+        /* =========================
+           GIFTS
+        ========================= */
+
+        function chooseGift(giftNumber){
+
+            /* Gift 1 */
+            if(giftNumber === 1){
+
+                document
+                    .getElementById("giftPage")
+                    .style.display = "none";
+
+                document
+                    .getElementById("nextPage")
+                    .style.display = "block";
+
+            }
+
+
+            /* Gift 2 */
+            else if(giftNumber === 2){
+
+                document
+                    .getElementById("giftPage")
+                    .style.display = "none";
+
+                document
+                    .getElementById("galleryPage")
+                    .style.display = "block";
+
+            }
+
+
+            /* Gift 3 - Sorry Note */
+            else if(giftNumber === 3){
+
+                document
+                    .getElementById("giftPage")
+                    .style.display = "none";
+
+                document
+                    .getElementById("sorryPage")
+                    .style.display = "block";
+
+            }
+
+        }
+
+
+        /* =========================
+           BACK TO GIFTS
+        ========================= */
+
+        function backToGifts(currentPageId){
+
+            document
+                .getElementById(currentPageId)
+                .style.display = "none";
+
+            document
+                .getElementById("giftPage")
+                .style.display = "block";
+
+        }
+
+
+        /* =========================
+           BACK TO LOGIN
+        ========================= */
+
+        function backToLogin(){
+
+            document
+                .getElementById("cakePage")
+                .style.display = "none";
+
+            document
+                .getElementById("giftPage")
+                .style.display = "none";
+
+            document
+                .getElementById("nextPage")
+                .style.display = "none";
+
+            document
+                .getElementById("galleryPage")
+                .style.display = "none";
+
+            document
+                .getElementById("sorryPage")
+                .style.display = "none";
+
+
+            document
+                .getElementById("cakeHeading")
+                .innerText =
+                "Make a Wish ✨";
+
+
+            const flames =
+                document.querySelectorAll(".flame");
+
+
+            flames.forEach(flame => {
+
+                flame.classList.remove(
+                    "extinguished"
+                );
+
+            });
+
+
+            document
+                .getElementById("cakeActionGroup")
+                .innerHTML = `
+
+                    <button
+                        class="action-btn wide-btn"
+                        id="blowBtn"
+                        onclick="blowCandles()"
+                    >
+                        Blow & Make your Wish 🎂
+                    </button>
+
+                `;
+
+
+            document
+                .getElementById("loginPage")
+                .style.display = "block";
+
+
+            clearDisplay();
+
+        }
+
+
+        /* =========================
+           IMAGE VIEWER
+        ========================= */
+
+        const imageData = [
+
+            {
+                src:"pic1.jpg",
+                caption:"Your Beautiful Smile 😊"
+            },
+
+            {
+                src:"pic2.jpg",
+                caption:"Candid Moments ✨"
+            },
+
+            {
+                src:"pic3.jpg",
+                caption:"My Whole Heart ❤️"
+            },
+
+            {
+                src:"pic4.jpg",
+                caption:"Cutest Person Ever 🥰"
+            },
+
+            {
+                src:"pic5.jpg",
+                caption:"That Sweet Laugh 😂💕"
+            },
+
+            {
+                src:"pic6.jpg",
+                caption:"Together is My Favorite Place 🗺️"
+            },
+
+            {
+                src:"pic7.jpg",
+                caption:"Special Day Out 🌟"
+            },
+
+            {
+                src:"pic8.jpg",
+                caption:"The Way You Look At Me 😍"
+            },
+
+            {
+                src:"pic9.jpg",
+                caption:"My queen 👑"
+            },
+
+            {
+                src:"pic10.jpg",
+                caption:"Forever & Always ♾️💖"
+            }
+
+        ];
+
+
+        let currentIndex = 0;
+
+
+        function openImage(index){
+
+            currentIndex = index;
+
+            document
+                .getElementById("viewer")
+                .style.display = "flex";
+
+            updateViewerContent();
+
+        }
+
+
+        function closeViewer(){
+
+            document
+                .getElementById("viewer")
+                .style.display = "none";
+
+        }
+
+
+        document
+            .getElementById("viewer")
+            .addEventListener(
+                "click",
+                function(e){
+
+                    if(e.target === this){
+
+                        closeViewer();
+
+                    }
+
+                }
+            );
+
+
+        function nextImage(event){
+
+            if(event){
+
+                event.stopPropagation();
+
+            }
+
+            currentIndex++;
+
+
+            if(currentIndex >= imageData.length){
+
+                currentIndex = 0;
+
+            }
+
+
+            updateViewerContent();
+
+        }
+
+
+        function prevImage(event){
+
+            if(event){
+
+                event.stopPropagation();
+
+            }
+
+            currentIndex--;
+
+
+            if(currentIndex < 0){
+
+                currentIndex =
+                    imageData.length - 1;
+
+            }
+
+
+            updateViewerContent();
+
+        }
+
+
+        function updateViewerContent(){
+
+            document
+                .getElementById("viewerImg")
+                .src =
+                imageData[currentIndex].src;
+
+
+            document
+                .getElementById("viewerCaption")
+                .innerText =
+                imageData[currentIndex].caption;
+
+        }
+
+    </script>
+
+</body>
+</html>
